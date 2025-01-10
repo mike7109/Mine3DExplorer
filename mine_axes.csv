@@ -1,0 +1,4 @@
+name,status,act_work,xs,ys,zs,xf,yf,zf
+"V1  --  Glavnui skipovoi ctvol",1,"000000000000000111100011111",0.0,0.0,1.0,0.0,-31.0,1.0
+"V2  --  Glavnui kletevoi ctvol",3,"000000000000001000000001111",5.0,0.0,5.0,5.0,-31.0,5.0
+"V3 Kvershlag kapitalnyi konveernyi",1,"000000000001000010010111111",0.0,-30.0,1.0,0.0,-30.0,10.0

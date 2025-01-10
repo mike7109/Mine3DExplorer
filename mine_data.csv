@@ -1,0 +1,4 @@
+name,status,xs,ys,zs,xf,yf,zf
+V1  --  Glavnui skipovoi ctvol,1,0.0,0.0,1.0,0.0,-31.0,1.0
+V2  --  Glavnui kletevoi ctvol,1,5.0,0.0,5.0,5.0,-31.0,5.0
+V3 Kvershlag kap. konveernyi,1,0.0,-30.0,1.0,0.0,-30.0,10.0
