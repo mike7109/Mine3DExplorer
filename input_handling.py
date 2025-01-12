@@ -4,10 +4,20 @@ from pygame.locals import *
 import math
 
 import config
+import screenshot
 
 def handle_event(event):
     """Обработка событий Pygame (клики и т.д.)"""
     if event.type == pygame.KEYDOWN:
+        # Например, нажали "p"
+        if event.key == pygame.K_p:
+            # делаем скриншот
+            filename = make_screenshot_filename()  # какую-то функцию придумываем
+            width = config.WINDOW_WIDTH
+            height = config.WINDOW_HEIGHT
+            screenshot.save_screenshot(filename, width, height)
+            # Или: screenshot.save_screenshot("my_screen.png", width, height)
+
         if event.key == pygame.K_ESCAPE:
             # По ESC можно, например, завершать программу
             pass
@@ -99,3 +109,8 @@ def update_camera_state():
     # E - вниз
     if pressed[pygame.K_e]:
         config.camera_y -= move_speed
+
+def make_screenshot_filename():
+    import time
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    return f"screenshot_{timestr}.png"
