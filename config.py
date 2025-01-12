@@ -37,3 +37,6 @@ labels_to_draw = []
 # Добавим переменные для текстур, например:
 floor_texture = None  # Текстура для пола (пример)
 wall_texture = None   # Если понадобится
+
+EQUIPMENT_DASH_LENGTH = 0.5
+EQUIPMENT_GAP_LENGTH = 0.5
