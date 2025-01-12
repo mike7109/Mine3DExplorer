@@ -8,8 +8,14 @@ import config
 import screenshot
 import main  # Для доступа к set_perspective
 
+DOUBLE_CLICK_TIME = 500  # Максимальное время между кликами в миллисекундах
+last_click_time = 0
+click_count = 0
+
 def handle_event(event):
     """Обработка событий Pygame (клики и т.д.)"""
+    global last_click_time, click_count
+
     if event.type == pygame.KEYDOWN:
         # Например, нажали "p"
         if event.key == pygame.K_p:
@@ -24,16 +30,29 @@ def handle_event(event):
             # По ESC можно, например, завершать программу
             pass
 
-        # Нажатие 'F' для переключения полноэкранного режима
-        if event.key == pygame.K_f:
-            config.fullscreen = not config.fullscreen
-            toggle_fullscreen()
+        # Нажатие 'F' для переключения полноэкранного режима, пока работает криво
+        # if event.key == pygame.K_f:
+        #     config.fullscreen = not config.fullscreen
+        #     toggle_fullscreen()
 
     # ====== Обработка нажатий мыши =======
     if event.type == pygame.MOUSEBUTTONDOWN:
         # Правая кнопка в Pygame обычно button=3
         if event.button == 3:
             config.right_mouse_held = True
+
+        # Обработка двойного щелчка левой кнопки для полноэкранного режима
+        if event.button == 1:
+            current_time = pygame.time.get_ticks()
+            if current_time - last_click_time < DOUBLE_CLICK_TIME:
+                click_count += 1
+                if click_count == 2:
+                    config.fullscreen = not config.fullscreen
+                    toggle_fullscreen()
+                    click_count = 0
+            else:
+                click_count = 1
+            last_click_time = current_time
 
     if event.type == pygame.MOUSEBUTTONUP:
         if event.button == 3:
@@ -131,7 +150,7 @@ def toggle_fullscreen():
         info = pygame.display.Info()
         config.WINDOW_WIDTH, config.WINDOW_HEIGHT = info.current_w, info.current_h
     else:
-        display_flags = DOUBLEBUF | OPENGL
+        display_flags = DOUBLEBUF | OPENGL | RESIZABLE  # Добавлен флаг RESIZABLE
         pygame.display.set_mode((800, 600), display_flags)  # Возвращаем стандартное разрешение
         config.WINDOW_WIDTH, config.WINDOW_HEIGHT = 800, 600
 

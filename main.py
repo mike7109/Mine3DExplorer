@@ -20,7 +20,7 @@ def set_perspective(width, height):
 
 def init_pygame_window(width=800, height=600):
     pygame.init()
-    display_flags = DOUBLEBUF | OPENGL
+    display_flags = DOUBLEBUF | OPENGL | RESIZABLE  # Добавлен флаг RESIZABLE
     pygame.display.set_mode((width, height), display_flags)
     pygame.display.set_caption("Mine3DExplorer — Only Mine Axes")
 
@@ -87,6 +87,7 @@ def main():
         pygame.display.flip()
         pygame.time.wait(10)
 
+    # Корректное завершение
     pygame.quit()
     sys.exit()
 
