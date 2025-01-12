@@ -33,7 +33,7 @@ def main():
 
     # Загрузка данных шахтных осей
     data_loader.load_mine_axes("mine_axes.csv")
-    # data_loader.load_equipment("equipment.csv")  # Предполагается, что есть соответствующие файлы
+    data_loader.load_equipment("equipment.csv")  # Предполагается, что есть соответствующие файлы
     # data_loader.load_works("works.csv")          # Предполагается, что есть соответствующие файлы
 
     running = True
