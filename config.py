@@ -32,6 +32,7 @@ lines_data = []
 axes_list = []       # для mine_axes
 equipment_list = []  # для equipment
 works_list = []      # для works
+labels_to_draw = []
 
 # Добавим переменные для текстур, например:
 floor_texture = None  # Текстура для пола (пример)

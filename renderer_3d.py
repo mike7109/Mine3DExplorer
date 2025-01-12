@@ -24,8 +24,13 @@ def draw_mine_axes():
     glLineWidth(1.0)
 
 def draw_equipment():
-    """Рисуем оборудование как линии."""
+    """Рисуем оборудование как пунктирные линии."""
     glLineWidth(2.0)
+    glEnable(GL_LINE_STIPPLE)  # Включаем штриховку линий
+
+    # Настраиваем паттерн штриховки: 0x00FF - 8 бит штрих, 8 бит пробел
+    glLineStipple(1, 0x00FF)  # Плотность и паттерн
+
     glBegin(GL_LINES)
     for eq in config.equipment_list:
         if eq['eq_status'] == 1:
@@ -37,7 +42,9 @@ def draw_equipment():
         glVertex3f(eq['xs'], eq['ys'], eq['zs'])
         glVertex3f(eq['xf'], eq['yf'], eq['zf'])
     glEnd()
-    glLineWidth(1.0)
+
+    glDisable(GL_LINE_STIPPLE)  # Выключаем штриховку линий
+    glLineWidth(3.0)
 
 def draw_work_places():
     """Рисуем рабочие места."""
