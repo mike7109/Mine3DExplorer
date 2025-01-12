@@ -11,22 +11,17 @@ import data_loader
 import renderer_3d
 import input_handling
 import renderer_2d
-
-def set_perspective(width, height):
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluPerspective(60.0, width / float(height), 0.1, 1000.0)  # Увеличено значение far до 1000.0
-    glMatrixMode(GL_MODELVIEW)
+import utils  # Импортируем новый модуль
 
 def init_pygame_window(width=800, height=600):
     pygame.init()
-    display_flags = DOUBLEBUF | OPENGL | RESIZABLE  # Добавлен флаг RESIZABLE
+    display_flags = DOUBLEBUF | OPENGL | RESIZABLE  # Добавлен RESIZABLE
     pygame.display.set_mode((width, height), display_flags)
     pygame.display.set_caption("Mine3DExplorer — Only Mine Axes")
 
     glEnable(GL_DEPTH_TEST)
     glClearColor(0.2, 0.3, 0.4, 1.0)
-    set_perspective(width, height)
+    utils.set_perspective(width, height)
 
 def main():
     # Инициализация окна
@@ -50,7 +45,7 @@ def main():
                 # Обработка изменения размера окна
                 config.WINDOW_WIDTH, config.WINDOW_HEIGHT = event.size
                 glViewport(0, 0, event.w, event.h)
-                set_perspective(event.w, event.h)
+                utils.set_perspective(event.w, event.h)
             input_handling.handle_event(event)
 
         input_handling.update_camera_state()
@@ -87,7 +82,6 @@ def main():
         pygame.display.flip()
         pygame.time.wait(10)
 
-    # Корректное завершение
     pygame.quit()
     sys.exit()
 

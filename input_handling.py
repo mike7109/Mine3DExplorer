@@ -6,7 +6,7 @@ import math
 
 import config
 import screenshot
-import main  # Для доступа к set_perspective
+import utils  # Вместо import main
 
 DOUBLE_CLICK_TIME = 500  # Максимальное время между кликами в миллисекундах
 last_click_time = 0
@@ -17,27 +17,25 @@ def handle_event(event):
     global last_click_time, click_count
 
     if event.type == pygame.KEYDOWN:
-        # Например, нажали "p"
+        # Нажали "p" для скриншота
         if event.key == pygame.K_p:
-            # делаем скриншот
-            filename = make_screenshot_filename()  # какую-то функцию придумываем
+            filename = make_screenshot_filename()
             width = config.WINDOW_WIDTH
             height = config.WINDOW_HEIGHT
             screenshot.save_screenshot(filename, width, height)
-            # Или: screenshot.save_screenshot("my_screen.png", width, height)
 
+        # Нажали ESC (добавляем событие выхода)
         if event.key == pygame.K_ESCAPE:
-            # По ESC можно, например, завершать программу
-            pass
+            pygame.event.post(pygame.event.Event(QUIT))
 
-        # Нажатие 'F' для переключения полноэкранного режима, пока работает криво
-        # if event.key == pygame.K_f:
-        #     config.fullscreen = not config.fullscreen
-        #     toggle_fullscreen()
+        # Нажатие 'F' для переключения полноэкранного режима
+        if event.key == pygame.K_f:
+            config.fullscreen = not config.fullscreen
+            toggle_fullscreen()
 
     # ====== Обработка нажатий мыши =======
     if event.type == pygame.MOUSEBUTTONDOWN:
-        # Правая кнопка в Pygame обычно button=3
+        # Правая кнопка мыши (button=3)
         if event.button == 3:
             config.right_mouse_held = True
 
@@ -75,8 +73,15 @@ def handle_event(event):
                 config.camera_pitch = -config.PITCH_LIMIT
 
 def update_camera_state():
-    """Движение камеры при нажатии W/S/A/D/Q/E."""
+    """Движение камеры при нажатии W/S/A/D/Q/E и ускорение при Shift."""
     pressed = pygame.key.get_pressed()
+
+    # Проверяем, удерживается ли Shift (левый или правый)
+    mods = pygame.key.get_mods()
+    shift_held = mods & pygame.KMOD_SHIFT
+
+    # Устанавливаем скорость перемещения
+    move_speed = config.MOVE_SPEED * 4 if shift_held else config.MOVE_SPEED
 
     # Перевод углов в радианы
     yaw_rad   = math.radians(config.camera_yaw)
@@ -91,18 +96,16 @@ def update_camera_state():
     up_x, up_y, up_z = 0.0, 1.0, 0.0
 
     # Вектор right = forward × up
-    right_x = forward_y*up_z - forward_z*up_y
-    right_y = forward_z*up_x - forward_x*up_z
-    right_z = forward_x*up_y - forward_y*up_x
+    right_x = forward_y * up_z - forward_z * up_y
+    right_y = forward_z * up_x - forward_x * up_z
+    right_z = forward_x * up_y - forward_y * up_x
 
-    # Нормируем right
+    # Нормализуем right
     rlen = math.sqrt(right_x**2 + right_y**2 + right_z**2)
     if rlen > 1e-9:
         right_x /= rlen
         right_y /= rlen
         right_z /= rlen
-
-    move_speed = config.MOVE_SPEED
 
     # W - вперёд
     if pressed[pygame.K_w]:
@@ -150,9 +153,9 @@ def toggle_fullscreen():
         info = pygame.display.Info()
         config.WINDOW_WIDTH, config.WINDOW_HEIGHT = info.current_w, info.current_h
     else:
-        display_flags = DOUBLEBUF | OPENGL | RESIZABLE  # Добавлен флаг RESIZABLE
+        display_flags = DOUBLEBUF | OPENGL | RESIZABLE
         pygame.display.set_mode((800, 600), display_flags)  # Возвращаем стандартное разрешение
         config.WINDOW_WIDTH, config.WINDOW_HEIGHT = 800, 600
 
     # Обновляем перспективу
-    main.set_perspective(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+    utils.set_perspective(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)

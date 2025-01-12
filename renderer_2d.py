@@ -26,7 +26,8 @@ def draw_2d_overlay():
         f"Camera yaw={config.camera_yaw:.2f}, pitch={config.camera_pitch:.2f}",
         "Controls: W/S/A/D - move, Q/E - up/down,",
         "Right Mouse - look around",
-        "F - Toggle Fullscreen"
+        "F - Toggle Fullscreen",
+        f"Speed: {'Fast' if pygame.key.get_mods() & pygame.KMOD_SHIFT else 'Normal'}"
     ]
 
     # Сохраняем матрицы
