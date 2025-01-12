@@ -49,8 +49,26 @@ def draw_work_places():
     glEnd()
     glPointSize(1.0)
 
+def draw_floor():
+    """Рисуем сеточную плоскость (пол)."""
+    grid_size = 50  # Количество линий в каждой плоскости
+    grid_spacing = 1.0  # Расстояние между линиями
+
+    glColor3f(0.5, 0.5, 0.5)  # Серый цвет сетки
+    glLineWidth(1.0)
+    glBegin(GL_LINES)
+    for i in range(-grid_size, grid_size + 1):
+        # Линии вдоль X
+        glVertex3f(-grid_size * grid_spacing, 0, i * grid_spacing)
+        glVertex3f(grid_size * grid_spacing, 0, i * grid_spacing)
+        # Линии вдоль Z
+        glVertex3f(i * grid_spacing, 0, -grid_size * grid_spacing)
+        glVertex3f(i * grid_spacing, 0, grid_size * grid_spacing)
+    glEnd()
+
 def draw_mine():
     """Главная функция рендеринга шахты."""
+    draw_floor()
     draw_mine_axes()
     draw_equipment()
     draw_work_places()

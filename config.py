@@ -22,9 +22,11 @@ PITCH_LIMIT = 89.0
 # Флаг: зажата ли правая кнопка мыши (для вращения)
 right_mouse_held = False
 
+# Флаг полноэкранного режима
+fullscreen = False
+
 # Линии для сцены
 lines_data = []
-
 
 # Списки, куда загрузим
 axes_list = []       # для mine_axes

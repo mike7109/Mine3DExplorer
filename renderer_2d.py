@@ -25,7 +25,8 @@ def draw_2d_overlay():
         f"Camera pos: X={config.camera_x:.2f}, Y={config.camera_y:.2f}, Z={config.camera_z:.2f}",
         f"Camera yaw={config.camera_yaw:.2f}, pitch={config.camera_pitch:.2f}",
         "Controls: W/S/A/D - move, Q/E - up/down,",
-        "Right Mouse - look around"
+        "Right Mouse - look around",
+        "F - Toggle Fullscreen"
     ]
 
     # Сохраняем матрицы
@@ -94,4 +95,3 @@ def draw_2d_overlay():
     glPopMatrix()
     glMatrixMode(GL_PROJECTION)
     glPopMatrix()
-

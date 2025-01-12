@@ -1,10 +1,12 @@
 # input_handling.py
+
 import pygame
 from pygame.locals import *
 import math
 
 import config
 import screenshot
+import main  # Для доступа к set_perspective
 
 def handle_event(event):
     """Обработка событий Pygame (клики и т.д.)"""
@@ -21,6 +23,11 @@ def handle_event(event):
         if event.key == pygame.K_ESCAPE:
             # По ESC можно, например, завершать программу
             pass
+
+        # Нажатие 'F' для переключения полноэкранного режима
+        if event.key == pygame.K_f:
+            config.fullscreen = not config.fullscreen
+            toggle_fullscreen()
 
     # ====== Обработка нажатий мыши =======
     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -47,7 +54,6 @@ def handle_event(event):
                 config.camera_pitch = config.PITCH_LIMIT
             if config.camera_pitch < -config.PITCH_LIMIT:
                 config.camera_pitch = -config.PITCH_LIMIT
-
 
 def update_camera_state():
     """Движение камеры при нажатии W/S/A/D/Q/E."""
@@ -114,3 +120,20 @@ def make_screenshot_filename():
     import time
     timestr = time.strftime("%Y%m%d-%H%M%S")
     return f"screenshot_{timestr}.png"
+
+def toggle_fullscreen():
+    """Переключение между оконным и полноэкранным режимом."""
+    width, height = config.WINDOW_WIDTH, config.WINDOW_HEIGHT
+    if config.fullscreen:
+        display_flags = DOUBLEBUF | OPENGL | FULLSCREEN
+        screen = pygame.display.set_mode((0, 0), display_flags)
+        # Обновляем ширину и высоту до разрешения экрана
+        info = pygame.display.Info()
+        config.WINDOW_WIDTH, config.WINDOW_HEIGHT = info.current_w, info.current_h
+    else:
+        display_flags = DOUBLEBUF | OPENGL
+        pygame.display.set_mode((800, 600), display_flags)  # Возвращаем стандартное разрешение
+        config.WINDOW_WIDTH, config.WINDOW_HEIGHT = 800, 600
+
+    # Обновляем перспективу
+    main.set_perspective(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
