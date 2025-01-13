@@ -16,7 +16,7 @@ def init_font():
     font_obj = pygame.font.SysFont("Arial", 20)
 
 def draw_2d_overlay():
-    """Рисуем текст в левом верхнем углу с правильной обработкой прозрачности."""
+    """Рисуем фиксированные элементы UI в левом верхнем углу."""
     global font_obj
     if not font_obj:
         return
@@ -30,7 +30,7 @@ def draw_2d_overlay():
         f"Speed: {'Fast' if pygame.key.get_mods() & pygame.KMOD_SHIFT else 'Normal'}"
     ]
 
-    # Сохраняем матрицы
+    # Сохраняем текущие матрицы
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
     glLoadIdentity()
@@ -51,11 +51,9 @@ def draw_2d_overlay():
     line_height = 22
     cur_y = y_start
 
+    # Рисуем фиксированные строки
     for text_line in lines:
-        # Рендер текста в Surface (белый текст на прозрачном фоне)
-        # surface = font_obj.render(text_line, True, (255, 255, 255, 255), (0, 0, 0, 0))
         surface = font_obj.render(text_line, True, (255, 255, 0))
-        # Исправляем цвета, если нужно (RGBA)
         text_data = pygame.image.tostring(surface, "RGBA", True)
 
         w, h = surface.get_size()
@@ -88,6 +86,7 @@ def draw_2d_overlay():
 
         cur_y += line_height
 
+    # Отключаем режимы
     glDisable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
 
