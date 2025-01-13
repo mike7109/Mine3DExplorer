@@ -50,6 +50,10 @@ def main():
 
         input_handling.update_camera_state()
 
+        # Обновление позиций вагонеток
+        for trolley in config.trolleys_list:
+            trolley.update()
+
         # Очищаем экран
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glMatrixMode(GL_MODELVIEW)

@@ -90,6 +90,80 @@ def draw_text_3d(text, position, scale=1.0, color=(255, 255, 0)):
     glDisable(GL_TEXTURE_2D)
     glDisable(GL_BLEND)
 
+def draw_trolley(trolley):
+    """Рисуем упрощённую вагонетку параллельно линии оборудования с вращающимися колёсами."""
+    position = trolley.get_position()
+    x, y, z = position
+
+    # Получаем направление движения для ориентации
+    direction = trolley.get_direction_vector()
+
+    # Вычисляем угол поворота на основе направления
+    angle = math.degrees(math.atan2(direction[0], direction[2]))  # atan2(X, Z)
+
+    glPushMatrix()
+    glTranslatef(x, y, z)
+    glRotatef(-angle, 0, 1, 0)  # Поворачиваем вагонетку вдоль линии
+
+    # Устанавливаем цвет вагоночки
+    glColor3f(0.7, 0.7, 0.7)  # Серый цвет
+
+    # Рисуем основной прямоугольный блок
+    glBegin(GL_QUADS)
+    # Передняя грань
+    glVertex3f(-0.5, 0.0, -0.2)
+    glVertex3f(0.5, 0.0, -0.2)
+    glVertex3f(0.5, 0.0, 0.2)
+    glVertex3f(-0.5, 0.0, 0.2)
+    # Задняя грань
+    glVertex3f(-0.5, -0.2, -0.2)
+    glVertex3f(0.5, -0.2, -0.2)
+    glVertex3f(0.5, -0.2, 0.2)
+    glVertex3f(-0.5, -0.2, 0.2)
+    # Боковые грани
+    glVertex3f(-0.5, 0.0, -0.2)
+    glVertex3f(0.5, 0.0, -0.2)
+    glVertex3f(0.5, -0.2, -0.2)
+    glVertex3f(-0.5, -0.2, -0.2)
+
+    glVertex3f(0.5, 0.0, -0.2)
+    glVertex3f(0.5, 0.0, 0.2)
+    glVertex3f(0.5, -0.2, 0.2)
+    glVertex3f(0.5, -0.2, -0.2)
+
+    glVertex3f(0.5, 0.0, 0.2)
+    glVertex3f(-0.5, 0.0, 0.2)
+    glVertex3f(-0.5, -0.2, 0.2)
+    glVertex3f(0.5, -0.2, 0.2)
+
+    glVertex3f(-0.5, 0.0, 0.2)
+    glVertex3f(-0.5, 0.0, -0.2)
+    glVertex3f(-0.5, -0.2, -0.2)
+    glVertex3f(-0.5, -0.2, 0.2)
+    glEnd()
+
+    # Рисуем колёса как цилиндры
+    wheel_radius = 0.05
+    wheel_length = 0.1
+    glColor3f(0, 0, 0)  # Черный цвет колёс
+
+    # Позиции колёс относительно центра вагонетки
+    wheel_offsets = [
+        (-0.3, -0.2, -0.3),
+        (0.3, -0.2, -0.3),
+        (-0.3, -0.2, 0.3),
+        (0.3, -0.2, 0.3)
+    ]
+
+    for offset in wheel_offsets:
+        glPushMatrix()
+        glTranslatef(*offset)
+        glRotatef(90, 1, 0, 0)  # Вращаем цилиндр, чтобы ось была по X
+        glRotatef(trolley.wheel_rotation, 0, 0, 1)  # Вращение колеса для анимации
+        gluCylinder(quadric, wheel_radius, wheel_radius, wheel_length, 12, 1)
+        glPopMatrix()
+
+    glPopMatrix()
 
 def draw_mine_axes():
     """Рисуем шахтные оси как линии."""
@@ -235,3 +309,7 @@ def draw_mine():
     draw_mine_axes()
     draw_equipment()
     draw_work_places()
+
+    # Рисуем все вагонетки
+    for trolley in config.trolleys_list:
+        draw_trolley(trolley)

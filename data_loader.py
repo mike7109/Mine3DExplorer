@@ -32,9 +32,9 @@ def load_equipment(csv_file):
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            eq_name   = row['eq_name']
+            eq_name = row['eq_name']
             eq_status = int(row['eq_status'])
-            line_eq   = int(row['line_eq'])
+            line_eq = int(row['line_eq'])
             xs = float(row['xs'])
             ys = float(row['ys'])
             zs = float(row['zs'])
@@ -43,14 +43,22 @@ def load_equipment(csv_file):
             zf = float(row['zf'])
 
             entry = {
-                'eq_name':   eq_name,
+                'eq_name': eq_name,
                 'eq_status': eq_status,
-                'line_eq':   line_eq,
+                'line_eq': line_eq,
                 'xs': xs, 'ys': ys, 'zs': zs,
                 'xf': xf, 'yf': yf, 'zf': zf
             }
             config.equipment_list.append(entry)
+
     print(f"Loaded {len(config.equipment_list)} equipment from {csv_file}")
+
+    # Создание вагонеток для каждого оборудования с индивидуальной скоростью (опционально)
+    for idx, equipment in enumerate(config.equipment_list):
+        speed = 0.005  # Пример: разные скорости для разных вагонеток
+        trolley = config.Trolley(equipment, speed=speed)
+        config.trolleys_list.append(trolley)
+    print(f"Initialized {len(config.trolleys_list)} trolleys.")
 
 
 def load_works(csv_file):
