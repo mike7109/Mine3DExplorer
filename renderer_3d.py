@@ -30,7 +30,7 @@ def get_text_texture(text, color=(255, 255, 0)):
     texture_id = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texture_id)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, text_data)
@@ -64,19 +64,23 @@ def draw_text_3d(text, position, scale=1.0, color=(255, 255, 0)):
     right = [modelview[0][0], modelview[1][0], modelview[2][0]]
     up = [modelview[0][1], modelview[1][1], modelview[2][1]]
 
-    # Масштабирование текста равномерно по всем осям
-    glScalef(scale, scale, scale)
+    # Вычисляем соотношение сторон текстуры
+    aspect_ratio = w / h
+    scaled_right = [component * scale * aspect_ratio for component in right]
+    scaled_up = [component * scale for component in up]
 
     # Рисуем текстурный квад
     glBegin(GL_QUADS)
-    glTexCoord2f(0, 1)
+    glTexCoord2f(0, 0)  # Нижний левый угол
     glVertex3f(0, 0, 0)
-    glTexCoord2f(1, 1)
-    glVertex3f(right[0], right[1], right[2])
-    glTexCoord2f(1, 0)
-    glVertex3f(right[0] + up[0], right[1] + up[1], right[2] + up[2])
-    glTexCoord2f(0, 0)
-    glVertex3f(up[0], up[1], up[2])
+    glTexCoord2f(1, 0)  # Нижний правый угол
+    glVertex3f(*scaled_right)
+    glTexCoord2f(1, 1)  # Верхний правый угол
+    glVertex3f(scaled_right[0] + scaled_up[0],
+               scaled_right[1] + scaled_up[1],
+               scaled_right[2] + scaled_up[2])
+    glTexCoord2f(0, 1)  # Верхний левый угол
+    glVertex3f(*scaled_up)
     glEnd()
 
     # Восстанавливаем матрицу
@@ -85,6 +89,7 @@ def draw_text_3d(text, position, scale=1.0, color=(255, 255, 0)):
     # Отключаем текстурирование и блэндинг
     glDisable(GL_TEXTURE_2D)
     glDisable(GL_BLEND)
+
 
 def draw_mine_axes():
     """Рисуем шахтные оси как линии."""
