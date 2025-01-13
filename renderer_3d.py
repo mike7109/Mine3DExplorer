@@ -7,7 +7,7 @@ from OpenGL.GLU import *
 import utils
 import pygame
 
-# Инициализируем Quadric объект для отрисовки сфер
+# Инициализируем Quadric объект для отрисовки цилиндров (может потребоваться удалить, если колёса больше не нужны)
 quadric = gluNewQuadric()
 
 # Инициализируем шрифт Pygame
@@ -17,6 +17,33 @@ font_obj = pygame.font.SysFont("Arial", 20)
 # Кэш текстур для названий
 text_texture_cache = {}
 
+
+def cross_product(v1, v2):
+    """Вычисляет векторное произведение двух векторов."""
+    x = v1[1] * v2[2] - v1[2] * v2[1]
+    y = v1[2] * v2[0] - v1[0] * v2[2]
+    z = v1[0] * v2[1] - v1[1] * v2[0]
+    return (x, y, z)
+
+
+def compute_yaw_pitch(direction):
+    """
+    Вычисляет углы yaw и pitch из вектора направления.
+
+    direction: кортеж (dx, dy, dz)
+    Возвращает: (yaw, pitch) в градусах
+    """
+    dx, dy, dz = direction
+    # Вычисляем yaw (угол вокруг Y)
+    yaw_rad = math.atan2(dx, dz)
+    yaw = math.degrees(yaw_rad)
+
+    # Вычисляем pitch (угол вверх/вниз)
+    horizontal_length = math.sqrt(dx ** 2 + dz ** 2)
+    pitch_rad = math.atan2(dy, horizontal_length)
+    pitch = math.degrees(pitch_rad)
+
+    return yaw, pitch
 
 def get_text_texture(text, color=(255, 255, 0)):
     key = (text, color)
@@ -91,76 +118,74 @@ def draw_text_3d(text, position, scale=1.0, color=(255, 255, 0)):
     glDisable(GL_BLEND)
 
 def draw_trolley(trolley):
-    """Рисуем упрощённую вагонетку параллельно линии оборудования с вращающимися колёсами."""
+    """Рисуем мини-поезд из трёх тонких прямоугольников с корректной ориентацией."""
     position = trolley.get_position()
-    x, y, z = position
-
-    # Получаем направление движения для ориентации
     direction = trolley.get_direction_vector()
 
-    # Вычисляем угол поворота на основе направления
-    angle = math.degrees(math.atan2(direction[0], direction[2]))  # atan2(X, Z)
+    # Вычисляем yaw и pitch из вектора направления
+    yaw, pitch = compute_yaw_pitch(direction)
 
     glPushMatrix()
-    glTranslatef(x, y, z)
-    glRotatef(-angle, 0, 1, 0)  # Поворачиваем вагонетку вдоль линии
+    glTranslatef(*position)
 
-    # Устанавливаем цвет вагоночки
-    glColor3f(0.7, 0.7, 0.7)  # Серый цвет
+    # Применяем вращение: сначала pitch, затем yaw
+    glRotatef(-pitch, 1, 0, 0)  # Вращение вокруг X-оси
+    glRotatef(-yaw, 0, 1, 0)  # Вращение вокруг Y-оси
 
-    # Рисуем основной прямоугольный блок
-    glBegin(GL_QUADS)
-    # Передняя грань
-    glVertex3f(-0.5, 0.0, -0.2)
-    glVertex3f(0.5, 0.0, -0.2)
-    glVertex3f(0.5, 0.0, 0.2)
-    glVertex3f(-0.5, 0.0, 0.2)
-    # Задняя грань
-    glVertex3f(-0.5, -0.2, -0.2)
-    glVertex3f(0.5, -0.2, -0.2)
-    glVertex3f(0.5, -0.2, 0.2)
-    glVertex3f(-0.5, -0.2, 0.2)
-    # Боковые грани
-    glVertex3f(-0.5, 0.0, -0.2)
-    glVertex3f(0.5, 0.0, -0.2)
-    glVertex3f(0.5, -0.2, -0.2)
-    glVertex3f(-0.5, -0.2, -0.2)
+    # Устанавливаем цвет мини-поезда
+    glColor3f(0.2, 0.6, 0.8)  # Например, голубой цвет
 
-    glVertex3f(0.5, 0.0, -0.2)
-    glVertex3f(0.5, 0.0, 0.2)
-    glVertex3f(0.5, -0.2, 0.2)
-    glVertex3f(0.5, -0.2, -0.2)
+    # Параметры прямоугольников
+    rect_length = 0.3  # Длина каждого прямоугольника
+    rect_height = 0.1  # Высота прямоугольника (тонкий)
+    rect_depth = 1.3  # Глубина прямоугольника
 
-    glVertex3f(0.5, 0.0, 0.2)
-    glVertex3f(-0.5, 0.0, 0.2)
-    glVertex3f(-0.5, -0.2, 0.2)
-    glVertex3f(0.5, -0.2, 0.2)
+    spacing = 0.05  # Расстояние между прямоугольниками
 
-    glVertex3f(-0.5, 0.0, 0.2)
-    glVertex3f(-0.5, 0.0, -0.2)
-    glVertex3f(-0.5, -0.2, -0.2)
-    glVertex3f(-0.5, -0.2, 0.2)
-    glEnd()
-
-    # Рисуем колёса как цилиндры
-    wheel_radius = 0.05
-    wheel_length = 0.1
-    glColor3f(0, 0, 0)  # Черный цвет колёс
-
-    # Позиции колёс относительно центра вагонетки
-    wheel_offsets = [
-        (-0.3, -0.2, -0.3),
-        (0.3, -0.2, -0.3),
-        (-0.3, -0.2, 0.3),
-        (0.3, -0.2, 0.3)
-    ]
-
-    for offset in wheel_offsets:
+    # Координаты для трёх прямоугольников
+    for i in range(1):
         glPushMatrix()
-        glTranslatef(*offset)
-        glRotatef(90, 1, 0, 0)  # Вращаем цилиндр, чтобы ось была по X
-        glRotatef(trolley.wheel_rotation, 0, 0, 1)  # Вращение колеса для анимации
-        gluCylinder(quadric, wheel_radius, wheel_radius, wheel_length, 12, 1)
+        # Смещаем каждый следующий прямоугольник назад по оси Z
+        glTranslatef(0, 0, -i * (rect_depth + spacing))
+
+        # Рисуем прямоугольник
+        glBegin(GL_QUADS)
+        # Верхняя грань
+        glVertex3f(-rect_length / 2, rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, rect_height / 2, rect_depth / 2)
+        glVertex3f(-rect_length / 2, rect_height / 2, rect_depth / 2)
+
+        # Нижняя грань
+        glVertex3f(-rect_length / 2, -rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, -rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, -rect_height / 2, rect_depth / 2)
+        glVertex3f(-rect_length / 2, -rect_height / 2, rect_depth / 2)
+
+        # Передняя грань
+        glVertex3f(-rect_length / 2, -rect_height / 2, rect_depth / 2)
+        glVertex3f(rect_length / 2, -rect_height / 2, rect_depth / 2)
+        glVertex3f(rect_length / 2, rect_height / 2, rect_depth / 2)
+        glVertex3f(-rect_length / 2, rect_height / 2, rect_depth / 2)
+
+        # Задняя грань
+        glVertex3f(-rect_length / 2, -rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, -rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, rect_height / 2, -rect_depth / 2)
+        glVertex3f(-rect_length / 2, rect_height / 2, -rect_depth / 2)
+
+        # Боковые грани
+        glVertex3f(-rect_length / 2, -rect_height / 2, -rect_depth / 2)
+        glVertex3f(-rect_length / 2, -rect_height / 2, rect_depth / 2)
+        glVertex3f(-rect_length / 2, rect_height / 2, rect_depth / 2)
+        glVertex3f(-rect_length / 2, rect_height / 2, -rect_depth / 2)
+
+        glVertex3f(rect_length / 2, -rect_height / 2, -rect_depth / 2)
+        glVertex3f(rect_length / 2, -rect_height / 2, rect_depth / 2)
+        glVertex3f(rect_length / 2, rect_height / 2, rect_depth / 2)
+        glVertex3f(rect_length / 2, rect_height / 2, -rect_depth / 2)
+        glEnd()
+
         glPopMatrix()
 
     glPopMatrix()
@@ -220,8 +245,6 @@ def draw_dashed_line(start, end, dash_length=0.5, gap_length=0.5):
         current_distance += dash_length if drawing else gap_length
         # Переключаем режим рисования
         drawing = not drawing
-
-# renderer_3d.py
 
 def draw_equipment():
     """Рисуем оборудование как пунктирные линии с сферами и названиями."""
@@ -310,6 +333,6 @@ def draw_mine():
     draw_equipment()
     draw_work_places()
 
-    # Рисуем все вагонетки
+    # Рисуем все вагонетки (мини-поезда)
     for trolley in config.trolleys_list:
         draw_trolley(trolley)

@@ -13,7 +13,7 @@ camera_z = 3.0
 camera_yaw = 0.0
 camera_pitch = 0.0
 
-MOVE_SPEED = 0.05
+MOVE_SPEED = 0.2
 MOUSE_SENSITIVITY = 0.1
 
 # Лимиты pitch
