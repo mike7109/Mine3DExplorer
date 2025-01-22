@@ -32,9 +32,9 @@ def handle_event(event):
         if event.button == 3:  # правая кнопка мыши
             config.right_mouse_held = True
 
-        if event.button == 1:  # левая кнопка
-            mx, my = event.pos
-            pick_axis(mx, my)
+        # if event.button == 1:  # левая кнопка
+        #     mx, my = event.pos
+        #     pick_axis(mx, my)
 
     if event.type == pygame.MOUSEBUTTONUP:
         if event.button == 3:

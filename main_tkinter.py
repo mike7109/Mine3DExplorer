@@ -6,8 +6,6 @@ import threading
 
 import config
 import data_loader
-
-# (Если нужно запускать/останавливать Pygame)
 import main_pygame
 
 class MainApp(tk.Tk):
@@ -16,7 +14,7 @@ class MainApp(tk.Tk):
         self.title("Главное окно приложения")
         self.geometry("1024x768")  # Устанавливаем фиксированный размер
 
-        # Загружаем данные (единожды здесь)
+        # Загрузка данных
         data_loader.load_mine_axes("mine_axes.csv")
         data_loader.load_equipment("equipment.csv")
         data_loader.load_works("works.csv")
@@ -37,8 +35,8 @@ class MainApp(tk.Tk):
         # Меню "Инструменты"
         tools_menu = tk.Menu(menubar, tearoff=False)
         tools_menu.add_command(label="Отобразить 3D модель", command=self.toggle_pygame_3d)
-        tools_menu.add_command(label="Управление выработками", command=self.show_manage_axes)
-        tools_menu.add_command(label="Создание работы", command=self.show_create_work)
+        tools_menu.add_command(label="Назначение нарядов", command=self.show_manage_axes)
+        tools_menu.add_command(label="Создание нарядов", command=self.show_create_work)
         menubar.add_cascade(label="Инструменты", menu=tools_menu)
 
         # Меню "Справка"
@@ -63,15 +61,11 @@ class MainApp(tk.Tk):
         sys.exit(0)
 
     def toggle_pygame_3d(self):
-        """Запуск или остановка Pygame-окна."""
-        if not self.pygame_running:
-            # Запустим в отдельном потоке
-            self.pygame_running = True
+        if not config.pygame_running:
+            # Запускаем
             t = threading.Thread(target=main_pygame.main, daemon=True)
             t.start()
         else:
-            # Тут зависит от реализации: вы можете отсылать сигнал в Pygame, чтобы он закрывался
-            # Например, можно поставить config.running = False, проверять в цикле Pygame
             messagebox.showinfo("Информация", "3D модель уже запущена!")
 
     def show_manage_axes(self):

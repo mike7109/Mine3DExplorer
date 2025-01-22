@@ -10,8 +10,13 @@ from pygame.locals import *
 import math
 
 def main():
+    renderer_3d.text_texture_cache = {}
     """Запускает окно Pygame/OpenGL"""
+    # Ставим флаг, что мы "запускаемся"
+    config.pygame_running = True
+
     pygame.init()
+
     display_flags = pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE
     screen = pygame.display.set_mode((1024, 768), display_flags)
     pygame.display.set_caption("Mine3DExplorer")
@@ -35,7 +40,8 @@ def main():
     running = True
 
     while running:
-        dt = clock.tick(60) / 1000.0
+        if config.force_close_pygame:
+            break
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -46,7 +52,7 @@ def main():
                 glViewport(0, 0, event.w, event.h)
                 utils.set_perspective(event.w, event.h)
 
-            input_handling.handle_event(event)  # Тут вызываем pick_axis упрощённо
+            input_handling.handle_event(event)
 
         # Обновление камеры
         input_handling.update_camera_state()
@@ -76,6 +82,5 @@ def main():
 
         pygame.display.flip()
 
-
     pygame.quit()
-    config.running = False
+    config.pygame_running = False

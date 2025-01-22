@@ -37,4 +37,5 @@ EQUIPMENT_GAP_LENGTH = 0.5
 settings_window = None
 selected_axis = None   # Какая выработка сейчас выделена
 selected_work = None   # Какая работа "активно" выбрана (последняя включенная)
-
+pygame_running = False  # глобальный флаг
+force_close_pygame = False

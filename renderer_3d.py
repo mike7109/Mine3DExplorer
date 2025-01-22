@@ -11,10 +11,12 @@ quadric = gluNewQuadric()
 
 text_texture_cache = {}
 pygame.font.init()
-font_obj = pygame.font.SysFont("Arial", 20)
+font_obj = None
 
 def draw_mine():
     """Главная функция рендера: рисуем выработки, оборудование, вагонетки и т.д."""
+    global font_obj
+    font_obj = pygame.font.SysFont("Arial", 20)
     draw_floor()
     draw_mine_axes()
     draw_equipment()
