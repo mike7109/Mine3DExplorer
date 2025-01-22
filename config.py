@@ -33,3 +33,8 @@ wall_texture = None
 # Параметры пунктирной линии для оборудования
 EQUIPMENT_DASH_LENGTH = 0.5
 EQUIPMENT_GAP_LENGTH = 0.5
+
+settings_window = None
+selected_axis = None   # Какая выработка сейчас выделена
+selected_work = None   # Какая работа "активно" выбрана (последняя включенная)
+

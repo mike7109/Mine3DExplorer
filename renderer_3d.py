@@ -38,23 +38,41 @@ def draw_floor():
     glEnd()
 
 def draw_mine_axes():
-    """Рисуем шахтные выработки (оси) как толстые цветные линии."""
     glLineWidth(3.0)
     glBegin(GL_LINES)
     for ax in config.axes_list:
-        status = ax.status
-        if status == 1:
-            glColor3f(1, 0, 0)
-        elif status == 2:
-            glColor3f(0, 1, 0)
-        elif status == 3:
-            glColor3f(0, 0, 1)
+        # Проверка, является ли эта ось выбранной
+        if ax == config.selected_axis:
+            # Подсвечиваем ось жёлтым
+            glColor3f(1.0, 1.0, 0.0)
         else:
-            glColor3f(0.8, 0.8, 0.8)
+            # Иначе обычная логика по status
+            if ax.status == 1:
+                glColor3f(1, 0, 0)
+            elif ax.status == 2:
+                glColor3f(0, 1, 0)
+            elif ax.status == 3:
+                glColor3f(0, 0, 1)
+            else:
+                glColor3f(0.8, 0.8, 0.8)
+
         glVertex3f(ax.xs, ax.ys, ax.zs)
         glVertex3f(ax.xf, ax.yf, ax.zf)
     glEnd()
     glLineWidth(1.0)
+
+    # Рисуем название работы на середине оси, если выбрано
+    if config.selected_axis and config.selected_work:
+        ax = config.selected_axis
+        # Проверим, активна ли эта работа на оси
+        if config.selected_work in ax.active_works:
+            mx = (ax.xs + ax.xf) / 2.0
+            my = (ax.ys + ax.yf) / 2.0
+            mz = (ax.zs + ax.zf) / 2.0
+
+            work_name = config.selected_work.work_name
+            # Выводим текст (например, жёлтый)
+            draw_text_3d(work_name, (mx, my, mz), scale=0.5, color=(255, 255, 0))
 
 def draw_equipment():
     """Рисуем оборудование как пунктирные линии + сфера + подпись."""

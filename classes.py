@@ -11,8 +11,15 @@ class MineAxis:
         self.xf = xf
         self.yf = yf
         self.zf = zf
-        # Связанные работы:
-        self.works = []  # список объектов Work
+        self.works = []         # все потенциальные работы
+        self.active_works = set()  # включённые пользователем
+
+    def enable_work(self, work_obj):
+        self.active_works.add(work_obj)
+
+    def disable_work(self, work_obj):
+        if work_obj in self.active_works:
+            self.active_works.remove(work_obj)
 
     def __repr__(self):
         return f"MineAxis(name={self.name}, status={self.status})"
