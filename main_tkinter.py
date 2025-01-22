@@ -47,7 +47,7 @@ class MainApp(tk.Tk):
 
         # Меню "Справка"
         help_menu = tk.Menu(menubar, tearoff=False)
-        help_menu.add_command(label="О программе", command=self.show_about)
+        help_menu.add_command(label="О программе", command=self.show_about_custom)
         menubar.add_cascade(label="Справка", menu=help_menu)
 
         # =========== Область контента (куда будем добавлять фреймы) ===========
@@ -89,8 +89,27 @@ class MainApp(tk.Tk):
         self.manage_axes_frame.pack_forget()
         self.create_work_frame.pack_forget()
 
-    def show_about(self):
-        messagebox.showinfo("О программе", "Версия 1.0\nСоздал Михаил!")
+    def show_about_custom(self):
+        about_window = tk.Toplevel(self)
+        about_window.title("О программе")
+        # Желаемые размеры, например 500x300
+        about_window.geometry("600x300")
+
+        text = (
+            "Версия 0.1\n\n"
+            "Приложение «Цифровой двойник» — интерактивное 3D-приложение, позволяющее\n"
+            "наглядно визуализировать структуру шахты и в реальном времени\n"
+            "управлять работами, оценивать риски, а также интегрироваться\n"
+            "с датчиками и системами планирования.\n\n"
+            "Научно-технического центра Прикладной электроники\n"
+            "Московского института электроники и математики им. А.Н. Тихонова\n"
+        )
+
+        label = tk.Label(about_window, text=text, justify="left", font=("Arial", 11))
+        label.pack(padx=10, pady=10, fill="both", expand=True)
+
+        btn_ok = tk.Button(about_window, text="OK", command=about_window.destroy)
+        btn_ok.pack(pady=10, side="bottom")
 
 class ManageAxesFrame(ttk.Frame):
     """Фрейм со списком выработок и чекбоксами доступных работ."""
