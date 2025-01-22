@@ -44,12 +44,11 @@ def draw_mine_axes():
     glLineWidth(3.0)
     glBegin(GL_LINES)
     for ax in config.axes_list:
-        # Проверка, является ли эта ось выбранной
+        # проверка, является ли ось выбранной
         if ax == config.selected_axis:
-            # Подсвечиваем ось жёлтым
-            glColor3f(1.0, 1.0, 0.0)
+            glColor3f(1.0, 1.0, 0.0)  # желтый
         else:
-            # Иначе обычная логика по status
+            # обычная логика
             if ax.status == 1:
                 glColor3f(1, 0, 0)
             elif ax.status == 2:
@@ -64,39 +63,27 @@ def draw_mine_axes():
     glEnd()
     glLineWidth(1.0)
 
-    # Если есть выделенная ось
-
+    # Рисуем текст (работы + риск) для каждой оси
     for ax in config.axes_list:
-        # Собираем названия работ
-        work_names = [w.work_name for w in ax.active_works]
-        works_str = ", ".join(work_names)
+        # если нет активных работ, ничего не пишем
+        if not ax.active_works:
+            continue
 
-        # Считаем суммарный риск
-        total_risk = combined_risk(ax.active_works)  # 0..1
-
-        # Формируем многострочный текст
-        # Например: "WL-1, WL-2\nСуммарный риск: 1.23%"
-        text_to_draw = f"{works_str}\nСуммарный риск: {total_risk * 100:.2f}%"
+        # Собираем названия работ и добавляем строку риска
+        lines = [w.work_name for w in ax.active_works]
+        from utils import combined_risk
+        total_risk = combined_risk(ax.active_works)
+        lines.append(f"Риск: {total_risk*100:.2f}%")
 
         # Координаты середины выработки
-        mx = (ax.xs + ax.xf) / 2
-        my = (ax.ys + ax.yf) / 2
-        mz = (ax.zs + ax.zf) / 2
-
-        # Сместим на 0.5 м по оси Y вверх (если ось Y - "вверх")
+        mx = (ax.xs + ax.xf) / 2.0
+        my = (ax.ys + ax.yf) / 2.0
+        mz = (ax.zs + ax.zf) / 2.0
+        # Смещаем чуть вверх (чтобы текст не «проваливался» в линию)
         my += 0.5
 
-        lines = []
-        for w in ax.active_works:
-            lines.append(w.work_name)
-        text_to_draw = "\n".join(lines)
-
-        if lines:
-            # ещё строка "Риск: X%"
-            total_risk = combined_risk(ax.active_works)
-            text_to_draw += f"\nРиск: {total_risk * 100:.2f}%"
-
-        draw_text_3d(text_to_draw, (mx, my, mz), scale=0.5, color=(255, 255, 0))
+        # Рисуем многострочно
+        draw_multiline_text_3d(lines, (mx, my, mz), scale=0.5, color=(255, 255, 0))
 
 
 def draw_equipment():
@@ -154,6 +141,79 @@ def draw_dashed_line(start, end, dash_length=0.5, gap_length=0.5):
             glEnd()
         current_dist += seg_len
         drawing = not drawing
+
+def draw_multiline_text_3d(lines, position, scale=1.0, color=(255, 255, 0)):
+    """
+    Рисуем несколько строк (lines) в 3D,
+    каждую строку отдельно, чтобы не 'сжимало' текст.
+    """
+    # Какое расстояние между строками
+    line_spacing = 1.2 * scale
+
+    # Для каждой строки рисуем её с небольшим вертикальным отступом
+    for i, line in enumerate(lines):
+        # Чем больше i, тем ниже строка:
+        offset_y = -i * line_spacing
+        draw_text_line_3d(line, position, offset_y, scale, color)
+
+def draw_text_line_3d(line, base_position, offset_y, scale, color):
+    """
+    Рисуем одну строку line в 3D.
+    offset_y — смещение вниз (или вверх) в единицах OpenGL вдоль вектора 'up'.
+    """
+    # Сначала получаем (texture_id, w, h)
+    texture_id, w, h = get_text_texture(line, color)
+    if not texture_id:
+        return
+
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+
+    glPushMatrix()
+    # Переносим к базовой точке
+    glTranslatef(*base_position)
+
+    # Считываем текущую матрицу, чтобы сделать биллборд
+    modelview = glGetDoublev(GL_MODELVIEW_MATRIX)
+    right = (modelview[0][0], modelview[1][0], modelview[2][0])
+    up    = (modelview[0][1], modelview[1][1], modelview[2][1])
+
+    # Вычислим aspect
+    aspect = w / float(h)
+
+    # Умножаем вектор right на (scale * aspect)
+    sr = [right[0] * scale * aspect,
+          right[1] * scale * aspect,
+          right[2] * scale * aspect]
+
+    # Умножаем вектор up на (scale)
+    su = [up[0] * scale, up[1] * scale, up[2] * scale]
+
+    # Дополнительно сместим всё на offset_y по оси up
+    dy = [up[0] * offset_y, up[1] * offset_y, up[2] * offset_y]
+    glTranslatef(*dy)
+
+    # Рисуем QUAD с текстурой
+    glBegin(GL_QUADS)
+    # левый нижний
+    glTexCoord2f(0, 0)
+    glVertex3f(0, 0, 0)
+    # правый нижний
+    glTexCoord2f(1, 0)
+    glVertex3f(sr[0], sr[1], sr[2])
+    # правый верхний
+    glTexCoord2f(1, 1)
+    glVertex3f(sr[0] + su[0], sr[1] + su[1], sr[2] + su[2])
+    # левый верхний
+    glTexCoord2f(0, 1)
+    glVertex3f(su[0], su[1], su[2])
+    glEnd()
+
+    glPopMatrix()
+    glDisable(GL_TEXTURE_2D)
+    glDisable(GL_BLEND)
 
 def draw_text_3d(text, position, scale=1.0, color=(255, 255, 0)):
     """Простейший биллборд-текст в 3D."""
