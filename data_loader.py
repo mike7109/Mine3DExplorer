@@ -56,12 +56,12 @@ def load_works(csv_file):
         reader = csv.DictReader(f)
         for row in reader:
             wname = row['short_name']
+            full_name = row['full_name']
             wcode = int(row['work_code'])
             cw    = int(row['col_work'])
             stw   = int(row['str_work'])
             risk  = float(row['ud_risk'])
-
-            w_obj = Work(wname, wcode, cw, stw, risk)
+            w_obj = Work(wname, full_name, wcode, cw, stw, risk)
             config.works_list.append(w_obj)
     print(f"Loaded {len(config.works_list)} works from {csv_file}")
 

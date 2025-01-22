@@ -47,8 +47,9 @@ class Equipment:
 
 class Work:
     """Класс для описания работы."""
-    def __init__(self, work_name, work_code, col_work, str_work, ud_risk):
+    def __init__(self, work_name, full_name, work_code, col_work, str_work, ud_risk):
         self.work_name = work_name
+        self.full_name = full_name
         self.work_code = work_code
         self.col_work = col_work
         self.str_work = str_work

@@ -214,7 +214,7 @@ class ManageAxesFrame(ttk.Frame):
             var = tki.BooleanVar(value=(work_obj in axis.active_works))
             chk = ttk.Checkbutton(
                 self.works_frame,
-                text=f"{work_obj.work_name} (код {work_obj.work_code})",
+                text=f"{work_obj.full_name} ( {work_obj.work_name})",
                 variable=var,
                 command=lambda w=work_obj, v=var: self.toggle_work(axis, w, v)
             )
