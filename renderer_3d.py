@@ -6,6 +6,7 @@ import pygame
 import config
 import utils
 from classes import Trolley  # если надо
+from utils import combined_risk
 
 quadric = gluNewQuadric()
 
@@ -63,26 +64,48 @@ def draw_mine_axes():
     glEnd()
     glLineWidth(1.0)
 
-    # Рисуем название работы на середине оси, если выбрано
-    if config.selected_axis and config.selected_work:
-        ax = config.selected_axis
-        # Проверим, активна ли эта работа на оси
-        if config.selected_work in ax.active_works:
-            mx = (ax.xs + ax.xf) / 2.0
-            my = (ax.ys + ax.yf) / 2.0
-            mz = (ax.zs + ax.zf) / 2.0
+    # Если есть выделенная ось
 
-            work_name = config.selected_work.work_name
-            # Выводим текст (например, жёлтый)
-            draw_text_3d(work_name, (mx, my, mz), scale=0.5, color=(255, 255, 0))
+    for ax in config.axes_list:
+        # Собираем названия работ
+        work_names = [w.work_name for w in ax.active_works]
+        works_str = ", ".join(work_names)
+
+        # Считаем суммарный риск
+        total_risk = combined_risk(ax.active_works)  # 0..1
+
+        # Формируем многострочный текст
+        # Например: "WL-1, WL-2\nСуммарный риск: 1.23%"
+        text_to_draw = f"{works_str}\nСуммарный риск: {total_risk * 100:.2f}%"
+
+        # Координаты середины выработки
+        mx = (ax.xs + ax.xf) / 2
+        my = (ax.ys + ax.yf) / 2
+        mz = (ax.zs + ax.zf) / 2
+
+        # Сместим на 0.5 м по оси Y вверх (если ось Y - "вверх")
+        my += 0.5
+
+        lines = []
+        for w in ax.active_works:
+            lines.append(w.work_name)
+        text_to_draw = "\n".join(lines)
+
+        if lines:
+            # ещё строка "Риск: X%"
+            total_risk = combined_risk(ax.active_works)
+            text_to_draw += f"\nРиск: {total_risk * 100:.2f}%"
+
+        draw_text_3d(text_to_draw, (mx, my, mz), scale=0.5, color=(255, 255, 0))
+
 
 def draw_equipment():
     """Рисуем оборудование как пунктирные линии + сфера + подпись."""
     glLineWidth(2.0)
     for eq in config.equipment_list:
-        if eq.eq_status == 1:
+        if eq.status == 1:
             glColor3f(1, 0.5, 0.5)
-        elif eq.eq_status == 2:
+        elif eq.status == 2:
             glColor3f(0.5, 1, 0.5)
         else:
             glColor3f(0.8, 0.8, 0.8)
@@ -101,7 +124,7 @@ def draw_equipment():
         glPopMatrix()
 
         # Подпись
-        draw_text_3d(eq.eq_name, start, scale=0.5, color=(255, 255, 0))
+        draw_text_3d(eq.short_name, start, scale=0.5, color=(255, 255, 0))
     glLineWidth(1.0)
 
 def draw_dashed_line(start, end, dash_length=0.5, gap_length=0.5):

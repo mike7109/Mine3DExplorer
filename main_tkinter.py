@@ -12,7 +12,13 @@ class MainApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Главное окно приложения")
-        self.geometry("1024x768")  # Устанавливаем фиксированный размер
+        self.geometry("1024x768")
+
+        style = ttk.Style(self)
+        style.theme_use("clam")  # попробуйте 'vista' или другое, зависит от ОС
+        style.configure("Treeview", font=("Arial", 10), rowheight=22)
+        style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
+        style.configure("TLabelFrame", background="#F0F0F0")
 
         # Загрузка данных
         data_loader.load_mine_axes("mine_axes.csv")
@@ -96,6 +102,8 @@ class ManageAxesFrame(ttk.Frame):
         # Две колонки: слева список выработок, справа - работы
         self.columnconfigure(0, weight=2)
         self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)  # Основная область
+        self.rowconfigure(1, weight=0)  # Нижняя часть не растягивается
 
         # ЛЕВАЯ ЧАСТЬ - список выработок
         left_frame = ttk.LabelFrame(self, text="Список выработок", padding=5)
@@ -107,7 +115,7 @@ class ManageAxesFrame(ttk.Frame):
 
         # Заполняем Listbox
         for axis in config.axes_list:
-            self.axes_listbox.insert(tk.END, axis.name)
+            self.axes_listbox.insert(tk.END, axis.full_name)
 
         # ПРАВАЯ ЧАСТЬ - чекбоксы для работ
         right_frame = ttk.LabelFrame(self, text="Работы на выработке", padding=5)
@@ -128,6 +136,60 @@ class ManageAxesFrame(ttk.Frame):
 
         self.current_checkvars = []
 
+        # Нижняя часть: bottom_frame
+        bottom_frame = ttk.Frame(self)
+        bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=20, pady=5)  # Изменён sticky и добавлены отступы
+
+        # Ограничим максимальную ширину нижней части (опционально)
+        bottom_frame.columnconfigure(0, weight=1)
+
+        # Разделим bottom_frame на 2 строки
+        bottom_frame.rowconfigure(0, weight=0)  # строка для лейбла
+        bottom_frame.rowconfigure(1, weight=1)  # строка для таблицы
+        bottom_frame.columnconfigure(0, weight=1)
+
+        # 1) Лейбл "Общий риск" в row=0
+        self.lbl_total_risk = ttk.Label(
+            bottom_frame,
+            text="Общий риск по шахте: 0.00%",
+            font=("Arial", 11, "bold")
+        )
+        self.lbl_total_risk.grid(row=0, column=0, sticky="w", padx=5, pady=5)
+
+        # 2) Фрейм для таблицы со скроллбаром (row=1)
+        table_frame = ttk.Frame(bottom_frame)
+        table_frame.grid(row=1, column=0, sticky="nsew")
+
+        # Настроим, чтобы table_frame растягивался
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
+
+        # Горизонтальный/вертикальный скроллбар (если нужно, хотя в примере только вертикальный)
+        vsb = ttk.Scrollbar(table_frame, orient="vertical")
+        vsb.grid(row=0, column=1, sticky="ns")
+
+        # TreeView в column=0
+        self.tree = ttk.Treeview(
+            table_frame,
+            columns=("axis", "works", "risk"),
+            show="headings",
+            yscrollcommand=vsb.set
+        )
+        self.tree.grid(row=0, column=0, sticky="nsew")
+
+        vsb.config(command=self.tree.yview)
+
+        # Настраиваем заголовки и ширину столбцов
+        self.tree.heading("axis", text="Выработка")
+        self.tree.heading("works", text="Активные работы")
+        self.tree.heading("risk", text="Сумм. риск (%)")
+        self.tree.column("axis", width=120, anchor="w")
+        self.tree.column("works", width=300, anchor="w")
+        self.tree.column("risk", width=100, anchor="e")
+
+        # Вызовем обновление, чтобы таблица и лейбл сразу заполнились
+        self.update_summary_table()
+
     def on_axis_select(self, event):
         # При выборе выработки в списке, показать её работы
         for child in self.works_frame.winfo_children():
@@ -143,7 +205,7 @@ class ManageAxesFrame(ttk.Frame):
         config.selected_axis = axis
 
         # Заголовок
-        title_label = ttk.Label(self.works_frame, text=f"Выработка: {axis.name}", font=("Arial", 11, "bold"))
+        title_label = ttk.Label(self.works_frame, text=f"Выработка: {axis.full_name}", font=("Arial", 11, "bold"))
         title_label.pack(pady=(0,5), anchor="w")
 
         # Чекбоксы по работам
@@ -161,6 +223,7 @@ class ManageAxesFrame(ttk.Frame):
 
         self.works_frame.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
+        self.update_summary_table()
 
     def toggle_work(self, axis, work_obj, bool_var):
         if bool_var.get():
@@ -170,6 +233,34 @@ class ManageAxesFrame(ttk.Frame):
             axis.disable_work(work_obj)
             if config.selected_work == work_obj:
                 config.selected_work = None
+
+        # Обновляем таблицу статистики
+        self.update_summary_table()
+
+    def update_summary_table(self):
+        """Обновить таблицу (TreeView) и общий риск."""
+        # Очистка предыдущих строк
+        for row_id in self.tree.get_children():
+            self.tree.delete(row_id)
+
+        # Заполняем заново
+        from utils import combined_risk_for_entire_mine, combined_risk
+        import config
+
+        for ax in config.axes_list:
+            if ax.active_works:
+                works_str = ", ".join(w.work_name for w in ax.active_works)
+                risk_val = combined_risk(ax.active_works)
+                risk_percent = f"{risk_val * 100:.2f}"
+            else:
+                works_str = "-"
+                risk_percent = "0.00"
+            self.tree.insert("", "end", values=(ax.full_name, works_str, risk_percent))
+
+        # Считаем общий риск
+        total_risk = combined_risk_for_entire_mine()
+        self.lbl_total_risk.config(text=f"Общий риск по всей шахте: {total_risk * 100:.2f}%")
+
 
 class CreateWorkFrame(ttk.Frame):
     """Фрейм для создания/редактирования новой работы."""

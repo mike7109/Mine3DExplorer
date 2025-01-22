@@ -22,3 +22,34 @@ def project_3d_to_2d(position):
 
 def make_screenshot_filename():
     return f"screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png"
+
+def combined_risk_for_entire_mine():
+    """
+    Считает суммарный риск по ВСЕЙ шахте, учитывая каждое
+    активное включение работы (даже если одна и та же работа
+    включена на нескольких выработках, это считается несколько раз).
+    Формула: P = 1 - П(1 - p_i).
+    """
+    import config
+
+    # Собираем все включённые работы в общий список (не set!)
+    all_works_list = []
+    for ax in config.axes_list:
+        # Добавляем все работы, которые активны на этой оси
+        all_works_list.extend(ax.active_works)
+
+    if not all_works_list:
+        return 0.0  # если нет работ, риск 0
+
+    product = 1.0
+    for w in all_works_list:
+        product *= (1.0 - w.ud_risk)
+
+    return 1.0 - product
+
+def combined_risk(work_set):
+    # Формула: P = 1 - Π(1 - p_i)
+    product = 1.0
+    for w in work_set:
+        product *= (1.0 - w.ud_risk)
+    return 1.0 - product

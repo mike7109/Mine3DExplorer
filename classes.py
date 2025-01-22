@@ -2,8 +2,9 @@ import math
 
 class MineAxis:
     """Класс для выработки (шахтной оси)."""
-    def __init__(self, name, status, xs, ys, zs, xf, yf, zf):
-        self.name = name
+    def __init__(self, short_name, full_name, status, xs, ys, zs, xf, yf, zf):
+        self.short_name = short_name
+        self.full_name = full_name
         self.status = status
         self.xs = xs
         self.ys = ys
@@ -11,6 +12,7 @@ class MineAxis:
         self.xf = xf
         self.yf = yf
         self.zf = zf
+
         self.works = []         # все потенциальные работы
         self.active_works = set()  # включённые пользователем
 
@@ -27,9 +29,10 @@ class MineAxis:
 
 class Equipment:
     """Класс для оборудования."""
-    def __init__(self, eq_name, eq_status, line_eq, xs, ys, zs, xf, yf, zf):
-        self.eq_name = eq_name
-        self.eq_status = eq_status
+    def __init__(self, short_name, full_name, status, line_eq, xs, ys, zs, xf, yf, zf):
+        self.short_name = short_name
+        self.full_name = full_name
+        self.status = status
         self.line_eq = line_eq
         self.xs = xs
         self.ys = ys
@@ -39,7 +42,7 @@ class Equipment:
         self.zf = zf
 
     def __repr__(self):
-        return f"Equipment(eq_name={self.eq_name}, eq_status={self.eq_status})"
+        return f"Equipment(eq_name={self.short_name}, eq_status={self.status})"
 
 
 class Work:

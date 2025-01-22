@@ -1,4 +1,28 @@
-work_name,work_code,col_work,str_work,ud_risk
-"WL-1-Otboika yglia &pogruska na konveer",101,6,553333,0.007
-"WL-2  -Peredvishka krepi v lave",102,4,553300,0.005
-"WL-3  -Ypravlenie kombainom v lave",103,2,540000,0.008
+short_name,имя,work_code,col_work,str_work,ud_risk
+WL1,Otboika yglia &pogruska na konveer,101,6,553333,0.007
+WL2,Peredvishka krepi v lave,102,4,553300,0.005
+WL3,Ypravlenie kombainom v lave,103,2,540000,0.008
+WL4,Ypravlenie elektrooborudov v lave,104,1,400000,0.0009
+WL5,Ypravlenie konveerom v lave,105,2,430000,0.0003
+WP1,Burenie skvashin v proxodke,201,4,543300,0.0006
+WP2,Pogruska ygla v proxodke,202,2,320000,0.0005
+WP3,Podgotovka k vzrivaniu v proxodke,203,2,540000,0.007
+WP4,Vzrivanie i provetrivan v proxodke,204,1,500000,0.009
+WP5,Vremennoe kreplenie v proxodke,205,4,532200,0.005
+WP6,Postoiannoe kreplenie v proxodke,206,4,543300,0.004
+WT1,Ypravlenie lentochnum konveerom,301,2,520000,0.002
+WT2,Ypravlenie eletrovozom,302,2,520000,0.003
+WT3,Ypravlenie monoreei,303,1,500000,0.004
+WT4,Ypravlenie podemnoi masinoi N2,304,2,520000,0.007
+WT5,Ypravlenie podemnoi masinoi N1,305,1,500000,0.0001
+WT6,Ypravlenie bunkerami ygla,306,2,420000,0.0001
+WT7,Ypravlenie nasosami,307,1,500000,0.0001
+WV1,Ypravlenie ventustanovkami,401,2,420000,0.0007
+WV2,Ypravlenie ventdverami i kommyt,402,2,420000,0.0001
+WR1,Remont osnovnogo dobivaus oborud,501,6,553322,0.001
+WR2,Remont osnovnogo proxodch oborud,502,4,553300,0.001
+WR3,Remont elektrotexnichesk oborud,503,4,543300,0.004
+WR4,Remont ventilacionnogo oborud,504,4,533300,0.002
+WR5,Poddejanie kreplenia virabotok,505,4,443300,0.003
+WR6,Podderjanie sistem vodootliva,506,2,320000,0.0075
+WR7,Dostavka materialov dla remonta,507,6,332211,0.0097

@@ -4,12 +4,12 @@ import math
 WINDOW_WIDTH = 1024
 WINDOW_HEIGHT = 768
 
-camera_x = 0.0
-camera_y = 0.0
-camera_z = 3.0
+camera_x = -66
+camera_y = 45
+camera_z = -129
 
-camera_yaw = 0.0
-camera_pitch = 0.0
+camera_yaw = -308
+camera_pitch = -36
 
 MOVE_SPEED = 0.2
 MOUSE_SENSITIVITY = 0.1

@@ -6,7 +6,8 @@ def load_mine_axes(csv_file):
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            name = row['name']
+            short_name = row['short_name']
+            full_name = row['full_name']
             status = int(row['status'])
             xs = float(row['xs'])
             ys = float(row['ys'])
@@ -15,7 +16,7 @@ def load_mine_axes(csv_file):
             yf = float(row['yf'])
             zf = float(row['zf'])
 
-            axis_obj = MineAxis(name, status, xs, ys, zs, xf, yf, zf)
+            axis_obj = MineAxis(short_name, full_name, status, xs, ys, zs, xf, yf, zf)
             config.axes_list.append(axis_obj)
 
     print(f"Loaded {len(config.axes_list)} mine axes from {csv_file}")
@@ -25,8 +26,9 @@ def load_equipment(csv_file):
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            eq_name = row['eq_name']
-            eq_status = int(row['eq_status'])
+            short_name = row['short_name']
+            full_name = row['full_name']
+            eq_status = int(row['status'])
             line_eq = int(row['line_eq'])
             xs = float(row['xs'])
             ys = float(row['ys'])
@@ -35,7 +37,7 @@ def load_equipment(csv_file):
             yf = float(row['yf'])
             zf = float(row['zf'])
 
-            eq_obj = Equipment(eq_name, eq_status, line_eq, xs, ys, zs, xf, yf, zf)
+            eq_obj = Equipment(short_name, full_name, eq_status, line_eq, xs, ys, zs, xf, yf, zf)
             config.equipment_list.append(eq_obj)
 
     print(f"Loaded {len(config.equipment_list)} equipment from {csv_file}")
@@ -53,7 +55,7 @@ def load_works(csv_file):
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            wname = row['work_name']
+            wname = row['short_name']
             wcode = int(row['work_code'])
             cw    = int(row['col_work'])
             stw   = int(row['str_work'])
@@ -70,14 +72,14 @@ def load_axis_works(csv_file):
         axis_name, work_code
     Связывает выработку (по имени) и работу (по коду).
     """
-    axis_by_name = {ax.name: ax for ax in config.axes_list}
+    axis_by_name = {ax.short_name: ax for ax in config.axes_list}
     work_by_code = {w.work_code: w for w in config.works_list}
 
     linked_count = 0
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            axis_name = row['axis_name'].strip()
+            axis_name = row['short_name'].strip()
             wcode = int(row['work_code'])
             if axis_name in axis_by_name and wcode in work_by_code:
                 axis_by_name[axis_name].works.append(work_by_code[wcode])
